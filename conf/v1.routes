@@ -1,0 +1,9 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+GET     /api/v1/blip                controllers.Blips.list()
+POST    /api/v1/blip                controllers.Blips.create()
+GET     /api/v1/blip/:id            controllers.Blips.get(id: Long)
+PUT     /api/v1/blip/:id            controllers.Blips.update(id: Long)
+DELETE  /api/v1/blip/:id            controllers.Blips.delete(id: Long)
