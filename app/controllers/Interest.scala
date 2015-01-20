@@ -1,8 +1,8 @@
-package Controllers
+package controllers
 
-class Interest (_iid: Long, _name: String) {
-  var iid = _iid
-  var name = _name
-}
+case class Interest(
+  iid: Long,
+  name: String
+)
 
-object Interest {TODO}
+// TODO - methods
