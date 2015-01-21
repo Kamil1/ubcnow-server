@@ -42,7 +42,7 @@ object GroupController extends Controller {
 
   def get(gid: Long) = Action {
     DB.withConnection { implicit c =>
-    val result: Group = SQL("select * from groups gid = {gid}").on("gid"->gid)().collect {
+    val result: Group = SQL("select * from groups where gid = {gid}").on("gid"->gid)().collect {
       case Row(gid: Long,
         name: String,
         interests: Long,

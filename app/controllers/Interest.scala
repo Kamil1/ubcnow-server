@@ -38,7 +38,7 @@ object InterestController extends Controller {
 
   def get(iid: Long) = Action{
     DB.withConnection { implicit c =>
-    val result: Interest = SQL("select * from interest iid = {iid}")().collect {
+    val result: Interest = SQL("select * from interest where iid = {iid}")().collect {
       case Row(iid: Long,
         name: String,
         groups: Long) => Interest(iid, name, groups)
