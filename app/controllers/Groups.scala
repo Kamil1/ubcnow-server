@@ -1,6 +1,5 @@
 package controllers
 
-import controllers.Interest
 import play.api._
 import play.api.Play.current
 import play.api.mvc._
