@@ -19,7 +19,7 @@ case class Blip(
     lng: Option[Double] = None
 )
 
-object Blips extends Controller {
+object BlipController extends Controller {
 
     implicit val blipWrites = new Writes[Blip] {
         def writes(blip: Blip): JsValue = Json.obj(
@@ -37,7 +37,15 @@ object Blips extends Controller {
     def list = Action {
         DB.withConnection { implicit c =>
             val results: List[Blip] = SQL("select * from blips")().collect {
-                case Row(id: Int, gid: Int, title: String, summary: Option[String], link: Option[String], time: Option[String], address: Option[String], lat: Option[Double], lng: Option[Double]) => Blip(id, gid, title, summary, link, time, address, lat, lng)
+                case Row(id: Int,
+                  gid: Int,
+                  title: String,
+                  summary: Option[String],
+                  link: Option[String],
+                  time: Option[String],
+                  address: Option[String],
+                  lat: Option[Double],
+                  lng: Option[Double]) => Blip(id, gid, title, summary, link, time, address, lat, lng)
             }.toList
             Ok(Json.toJson(results))
         }
@@ -48,7 +56,15 @@ object Blips extends Controller {
     def get(id: Long) = Action {
         DB.withConnection { implicit c =>
             val result: Blip = SQL("select * from blips where id = {id}").on("id" -> id)().collect {
-                case Row(id: Int, gid: Int, title: String, summary: Option[String], link: Option[String], time: Option[String], address: Option[String], lat: Option[Double], lng: Option[Double]) => Blip(id, gid, title, summary, link, time, address, lat, lng)
+                case Row(id: Int,
+                  gid: Int,
+                  title: String,
+                  summary: Option[String],
+                  link: Option[String],
+                  time: Option[String],
+                  address: Option[String],
+                  lat: Option[Double],
+                  lng: Option[Double]) => Blip(id, gid, title, summary, link, time, address, lat, lng)
             }.head
             Ok(Json.toJson(result))
         }

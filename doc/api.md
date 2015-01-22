@@ -72,12 +72,12 @@ TODO: groups admin API
 
 ### Specification
 
-| Field      | Type            | Description                                | Required |
-| ---------- | --------------- | ------------------------------------------ | -------- |
-| gid        | Long            | Group identifier                           | true     |
-| name       | String          | A user-readable group name                 | true     |
-| interests  | Array[Interest] | List of interestes pertinent to this group | true     |
-| concrete   | Boolean         | True if this is a concrete group           | true     |
+| Field      | Type            | Description                                            | Required |
+| ---------- | --------------- | ------------------------------------------------------ | -------- |
+| gid        | Long            | Group identifier                                       | true     |
+| name       | String          | A user-readable group name                             | true     |
+| interests  | Long            | The identifier of the appropriate group-interest object| true     |
+| concrete   | Boolean         | True if this is a concrete group                       | true     |
 
 
 #### Example Data
@@ -97,10 +97,11 @@ groups to identify potential Blips of interest.
 
 ### Specification
 
-| Field      | Type          | Description                                | Required |
-| ---------- | ------------- | ------------------------------------------ | -------- |
-| iid        | Long          | Interest identifier                        | true     |
-| name       | String        | User-readable name of this interest        | true     |
+| Field      | Type          | Description                                             | Required |
+| ---------- | ------------- | ------------------------------------------------------- | -------- |
+| iid        | Long          | Interest identifier                                     | true     |
+| name       | String        | User-readable name of this interest                     | true     |
+| groups     | Long          | The identifier of the appropriate group-interest object | true     |
 
 
 ### Example Data
