@@ -36,17 +36,9 @@ object BlipController extends Controller {
 
     def list = Action {
         DB.withConnection { implicit c =>
-            val results: List[Blip] = SQL("select * from blips")().collect {
-                case Row(id: Int,
-                  gid: Int,
-                  title: String,
-                  summary: Option[String],
-                  link: Option[String],
-                  time: Option[String],
-                  address: Option[String],
-                  lat: Option[Double],
-                  lng: Option[Double]) => Blip(id, gid, title, summary, link, time, address, lat, lng)
-            }.toList
+            val results: List[Blip] = SQL("select * from blips")()
+                .collect(matchBlip)
+                .toList
             Ok(Json.toJson(results))
         }
     }
@@ -55,17 +47,10 @@ object BlipController extends Controller {
 
     def get(id: Long) = Action {
         DB.withConnection { implicit c =>
-            val result: Blip = SQL("select * from blips where id = {id}").on("id" -> id)().collect {
-                case Row(id: Int,
-                  gid: Int,
-                  title: String,
-                  summary: Option[String],
-                  link: Option[String],
-                  time: Option[String],
-                  address: Option[String],
-                  lat: Option[Double],
-                  lng: Option[Double]) => Blip(id, gid, title, summary, link, time, address, lat, lng)
-            }.head
+            val result: Blip = SQL("select * from blips where id = {id}")
+                .on("id" -> id)()
+                .collect(matchBlip)
+                .head
             Ok(Json.toJson(result))
         }
     }
@@ -73,5 +58,18 @@ object BlipController extends Controller {
     def update(id: Long) = TODO
 
     def delete(id: Long) = TODO
+
+    def matchBlip: PartialFunction[Row,Blip] = {
+        case Row(id: Int,
+          gid: Int,
+          title: String,
+          summary: Option[String],
+          link: Option[String],
+          time: Option[String],
+          address: Option[String],
+          lat: Option[Double],
+          lng: Option[Double]) => Blip(id, gid, title, summary, link, time,
+                                       address, lat, lng)
+    }
 
 }
