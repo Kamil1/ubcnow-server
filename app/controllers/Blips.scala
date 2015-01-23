@@ -10,7 +10,7 @@ import anorm._
 case class Blip(
     id: Long,
     gid: Long,
-    name: String,
+    title: String,
     summary: Option[String] = None,
     link: Option[String] = None,
     time: Option[String] = None,
@@ -25,7 +25,7 @@ object BlipController extends Controller {
         def writes(blip: Blip): JsValue = Json.obj(
             "id" -> blip.id,
             "gid" -> blip.gid,
-            "name" -> blip.name,
+            "title" -> blip.title,
             "summary" -> blip.summary,
             "link" -> blip.link,
             "time" -> blip.time,
@@ -36,7 +36,7 @@ object BlipController extends Controller {
 
     def list = Action {
         DB.withConnection { implicit c =>
-            val results: List[Blip] = SQL("select * from blips")().collect {
+            val results: List[Blip] = SQL("SELECT * FROM blips")().collect {
                 case Row(id: Int,
                   gid: Int,
                   title: String,
@@ -51,11 +51,28 @@ object BlipController extends Controller {
         }
     }
 
-    def create = TODO
+    def create(id: Long,
+      gid: Long,
+      title: String,
+      summary: Option[String] = None,
+      link: Option[String] = None,
+      time: Option[String] = None,
+      address: Option[String] = None,
+      lat: Option[Double] = None,
+      lng: Option[Double] = None) = Action {
+        DB.withConnection { implicit c =>
+        SQL("""
+          INSERT INTO blips (id, gid, title, summary, link, time, address, lat, lng) 
+          VALUES ({id}, {gid}, {title}, {summary}, {link}, {time}, {address}, {lat}, {lng})
+          """)
+      // TODO - Match users and blips
+      }
+        
+
 
     def get(id: Long) = Action {
         DB.withConnection { implicit c =>
-            val result: Blip = SQL("select * from blips where id = {id}").on("id" -> id)().collect {
+            val result: Blip = SQL("SELECT * FROM blips WHERE id = {id}").on("id" -> id)().collect {
                 case Row(id: Int,
                   gid: Int,
                   title: String,
