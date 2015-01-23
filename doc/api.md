@@ -61,7 +61,7 @@ TODO
 
 ## Users
 
-TODO: (probably best to wait on auth for this one)
+TODO: (probably best to wait on auth (CWL) for this one)
 
 ## Groups
 
