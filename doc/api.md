@@ -74,9 +74,9 @@ TODO: groups admin API
 
 | Field      | Type            | Description                                            | Required |
 | ---------- | --------------- | ------------------------------------------------------ | -------- |
-| gid        | Long            | Group identifier                                       | true     |
+| id         | Long            | Group identifier                                       | true     |
 | name       | String          | A user-readable group name                             | true     |
-| interests  | Long            | The identifier of the appropriate group-interest object| true     |
+| interests  | List[Interest]  | A list of interests the group relates to.              | true     |
 | concrete   | Boolean         | True if this is a concrete group                       | true     |
 
 
@@ -99,10 +99,8 @@ groups to identify potential Blips of interest.
 
 | Field      | Type          | Description                                             | Required |
 | ---------- | ------------- | ------------------------------------------------------- | -------- |
-| iid        | Long          | Interest identifier                                     | true     |
+| id         | Long          | Interest identifier                                     | true     |
 | name       | String        | User-readable name of this interest                     | true     |
-| groups     | Long          | The identifier of the appropriate group-interest object | true     |
-
 
 ### Example Data
 
@@ -110,17 +108,33 @@ TODO
 
 # Endpoints
 
+Note that all HTTP body responses are encoded in JSON.
+
 ## Blips
 
-| Path | Method | Notes | Parameters |
-| ---- | ------ | ------| ---------- |
-| /blip/      | GET    | Receives a list of the user's current blips. |
-| /blip/      | POST   | Creates a new blip with the JSON data in the request's body. |
-| /blip/:id   | GET    | Retrieves the blip with the given id. |
-| /blip/:id   | PUT    | Updates the blip's fields with the JSON data in the request's body. TODO: authenticate. |
-| /blip/:id   | DELETE | Deletes the blip with the given id. |
+| Path | Method | Notes | Request | Response |
+| ---- | ------ | ------| ------- | -------- |
+| /blip       | GET    | Receives a list of the user's current blips. | N/A | List[Blip] |
+| /blip       | POST   | Creates a new blip with the JSON data in the request's body. | Blip | N/A |
+| /blip/:id   | GET    | Retrieves the blip with the given id. | N/A | Blip |
+| /blip/:id   | PUT    | Updates the blip's fields with the JSON data in the request's body. TODO: authenticate. | Blip | N/A |
+| /blip/:id   | DELETE | Deletes the blip with the given id. | N/A | N/A |
 
-TODO: group-specific blip pulling.
+### Examples
+
+TODO
+
+## Groups
+
+| Path | Method | Notes | Request | Response |
+| ---- | ------ | ----- | ------- | -------- |
+| /group | GET | Retrieves a list of the user's groups. | N/A | List[Group] |
+| /group | POST | Creates a new group. | Group | N/A |
+| /group/:id | GET | Retrieves the group with the given id. | N/A | Group |
+| /group/:id | PUT | Updates a group. | Group | N/A |
+| /group/:id | DELETE | Deletes a group. | N/A | N/A |
+| /group/blips | GET | Retrieves a list of blips belonging to the group, recent first. | count: Int, after: Blip.id | List[Blip] |
+| /group/search | GET | Finds groups with the given query string. | query: String | List[Group] |
 
 ### Examples
 
