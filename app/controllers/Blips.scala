@@ -36,7 +36,7 @@ object BlipController extends Controller {
 
     def list = Action {
         DB.withConnection { implicit c =>
-            val results: List[Blip] = SQL("select * from blips")()
+            val results: List[Blip] = SQL("SELECT * FROM blips")()
                 .collect(matchBlip)
                 .toList
             Ok(Json.toJson(results))
@@ -47,7 +47,7 @@ object BlipController extends Controller {
 
     def get(id: Long) = Action {
         DB.withConnection { implicit c =>
-            val result: Blip = SQL("select * from blips where id = {id}")
+            val result: Blip = SQL("SELECT * FROM blips WHERE id = {id}")
                 .on("id" -> id)()
                 .collect(matchBlip)
                 .head
