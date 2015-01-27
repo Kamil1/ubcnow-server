@@ -6,7 +6,7 @@ CREATE TABLE groups (
     id INTEGER NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     concrete BOOLEAN NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
 );
 
 CREATE TABLE blips (
@@ -29,6 +29,17 @@ CREATE TABLE interests (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE users (
+    puid INTEGER NOT NULL AUTO_INCREMENT,
+    studentNumber INTEGER,
+    affiliation VARCHAR(255) NOT NULL,
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    iid INTEGER NOT NULL,
+    gid INTEGER NOT NULL.
+    PRIMARY KEY (puid),
+);
+
 CREATE TABLE group_interests (
     id INTEGER NOT NULL AUTO_INCREMENT,
     gid INTEGER NOT NULL,
@@ -36,6 +47,24 @@ CREATE TABLE group_interests (
     PRIMARY KEY (id),
     FOREIGN KEY (gid) REFERENCES groups(id),
     FOREIGN KEY (iid) REFERENCES interests(id)
+);
+
+CREATE TABLE user_interests (
+    id INTEGER NOT NULL AUTO_INCREMENT,
+    puid INTEGER NOT NULL,
+    iid INTEGER NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (puid) REFERENCES users(puid),
+    FOREIGN KEY (iid) REFERENCES interests(id)
+);
+
+CREATE TABLE user_groups (
+    id INTEGER NOT NULL AUTO_INCREMENT,
+    puid INTEGER NOT NULL,
+    gid INTEGER NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (puid) REFERENCES users(puid),
+    FOREIGN KEY (gid) REFERENCES groups(id)
 );
 
 -- FIXME: Placeholder data

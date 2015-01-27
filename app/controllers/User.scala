@@ -11,12 +11,11 @@ import play.api.libs.json.Json.JsValueWrapper
 case class User (
   puid: Long,
   studentNumber: Option[Long] = None,
-  employeeNumber: Option[Long] = None,
   affliation: String,
   firstName: String,
   lastName: String,
-  interests: Long, //List[Interest]
-  groups: Long     //List[Group]
+  iid: Long, //List[Interest]
+  gid: Long     //List[Group]
 )
 
 object UserController extends Controller {
@@ -25,7 +24,6 @@ object UserController extends Controller {
     def writes(user: User): JsValue = Json.obj(
       "puid" -> user.puid,
       "studentNumber" -> user.studentNumber,
-      "employeeNumber" -> user.employeeNumber,
       "affiliation" -> user.affliation,
       "firstName" -> user.firstName,
       "lastName" -> user.lastName,
@@ -61,13 +59,12 @@ object UserController extends Controller {
   def matchUser: PartialFunction[Row,User] = {
     case Row(puid: Long,
       studentNumber: Option[Long],
-      employeeNumber: Option[Long],
       affiliation: String,
       firstName: String,
       lastName: String,
       interests: Long,
       groups: Long
-      ) => User(puid, studentNumber, employeeNumber, affiliation, firstName, lastName, interests, groups)
+      ) => User(puid, studentNumber, affiliation, firstName, lastName, interests, groups)
   }
 
 }
