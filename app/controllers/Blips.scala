@@ -6,18 +6,7 @@ import play.api.mvc._
 import play.api.db._
 import play.api.libs.json._
 import anorm._
-
-case class Blip(
-    id: Long,
-    gid: Long,
-    name: String,
-    summary: Option[String] = None,
-    link: Option[String] = None,
-    time: Option[String] = None,
-    address: Option[String] = None,
-    lat: Option[Double] = None,
-    lng: Option[Double] = None
-)
+import models.Blip
 
 object BlipController extends Controller {
 

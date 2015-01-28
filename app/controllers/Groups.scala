@@ -8,13 +8,7 @@ import play.api.libs.json._
 import anorm._
 import play.api.libs.json.Json.JsValueWrapper
 import scala.collection.mutable.ArrayBuffer
-
-case class Group(
-    gid: Int,
-    name: String, 
-    concrete: Boolean,
-    interests: ArrayBuffer[Int]
-)
+import models.Group
 
 object GroupController extends Controller {
 
