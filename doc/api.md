@@ -76,7 +76,7 @@ TODO: groups admin API
 | ---------- | --------------- | ------------------------------------------------------ | -------- |
 | id         | Long            | Group identifier                                       | true     |
 | name       | String          | A user-readable group name                             | true     |
-| interests  | List[Interest]  | A list of interests the group relates to.              | true     |
+| interests  | List[Long]      | A list of interest IDs the group relates to.           | true     |
 | concrete   | Boolean         | True if this is a concrete group                       | true     |
 
 
@@ -133,7 +133,7 @@ TODO
 | /group/:id | GET | Retrieves the group with the given id. | N/A | Group |
 | /group/:id | PUT | Updates a group. | Group | N/A |
 | /group/:id | DELETE | Deletes a group. | N/A | N/A |
-| /group/blips | GET | Retrieves a list of blips belonging to the group, recent first. | count: Int, after: Blip.id | List[Blip] |
+| /group/:id/blips | GET | Retrieves a list of blips belonging to the group, recent first. | count: Int, after: Blip.id | List[Blip] |
 | /group/search | GET | Finds groups with the given query string. | query: String | List[Group] |
 
 ### Examples
