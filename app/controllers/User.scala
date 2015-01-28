@@ -62,8 +62,8 @@ object UserController extends Controller {
       affiliation: String,
       firstName: String,
       lastName: String,
-      interests: Long,
-      groups: Long
+      interests: List[Long],
+      groups: List[Long]
       ) => User(puid, studentNumber, affiliation, firstName, lastName, interests, groups)
   }
 
