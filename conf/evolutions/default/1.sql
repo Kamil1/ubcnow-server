@@ -6,7 +6,7 @@ CREATE TABLE groups (
     id INTEGER NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     concrete BOOLEAN NOT NULL,
-    PRIMARY KEY (id),
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE blips (
@@ -35,9 +35,7 @@ CREATE TABLE users (
     affiliation VARCHAR(255) NOT NULL,
     firstName VARCHAR(255) NOT NULL,
     lastName VARCHAR(255) NOT NULL,
-    iid INTEGER NOT NULL,
-    gid INTEGER NOT NULL.
-    PRIMARY KEY (puid),
+    PRIMARY KEY (puid)
 );
 
 CREATE TABLE group_interests (

@@ -27,8 +27,8 @@ object UserController extends Controller {
       "affiliation" -> user.affliation,
       "firstName" -> user.firstName,
       "lastName" -> user.lastName,
-      "interests" -> user.interests,
-      "groups" -> user.groups)
+      "interests" -> user.iid,
+      "groups" -> user.gid)
   }
 
   def list = Action {
