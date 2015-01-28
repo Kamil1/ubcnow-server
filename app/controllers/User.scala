@@ -1,4 +1,4 @@
-package Controller
+package controller
 
 import play.api._
 import play.api.Play.current
@@ -14,8 +14,8 @@ case class User (
   affliation: String,
   firstName: String,
   lastName: String,
-  iid: Long, //List[Interest]
-  gid: Long     //List[Group]
+  interests: List[Long],
+  groups: List[Long]
 )
 
 object UserController extends Controller {
@@ -27,8 +27,8 @@ object UserController extends Controller {
       "affiliation" -> user.affliation,
       "firstName" -> user.firstName,
       "lastName" -> user.lastName,
-      "interests" -> user.iid,
-      "groups" -> user.gid)
+      "interests" -> user.interests,
+      "groups" -> user.groups)
   }
 
   def list = Action {
