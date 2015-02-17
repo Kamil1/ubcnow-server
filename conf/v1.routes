@@ -7,3 +7,13 @@ POST    /api/v1/blip                controllers.BlipController.create()
 GET     /api/v1/blip/:id            controllers.BlipController.get(id: Long)
 PUT     /api/v1/blip/:id            controllers.BlipController.update(id: Long)
 DELETE  /api/v1/blip/:id            controllers.BlipController.delete(id: Long)
+
+#CAS
+GET     /                           controllers.Application.index()
+GET     /cas/index.html             controllers.Application.casIndex()
+GET     /callback                   org.pac4j.play.CallbackController.callback()
+POST    /callback                   org.pac4j.play.CallbackController.callback()
+GET     /casProxyCallback           org.pac4j.play.CallbackController.callback()
+POST    /casProxyCallback           org.pac4j.play.CallbackController.callback()
+GET     /logout                     org.pac4j.play.CallbackController.logoutAndRedirect()
+
