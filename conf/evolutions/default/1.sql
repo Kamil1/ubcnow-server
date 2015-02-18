@@ -29,6 +29,15 @@ CREATE TABLE interests (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE users (
+    puid INTEGER NOT NULL AUTO_INCREMENT,
+    studentNumber INTEGER,
+    affiliation VARCHAR(255) NOT NULL,
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    PRIMARY KEY (puid)
+);
+
 CREATE TABLE group_interests (
     id INTEGER NOT NULL AUTO_INCREMENT,
     gid INTEGER NOT NULL,
@@ -38,10 +47,30 @@ CREATE TABLE group_interests (
     FOREIGN KEY (iid) REFERENCES interests(id)
 );
 
+CREATE TABLE user_interests (
+    id INTEGER NOT NULL AUTO_INCREMENT,
+    puid INTEGER NOT NULL,
+    iid INTEGER NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (puid) REFERENCES users(puid),
+    FOREIGN KEY (iid) REFERENCES interests(id)
+);
+
+CREATE TABLE user_groups (
+    id INTEGER NOT NULL AUTO_INCREMENT,
+    puid INTEGER NOT NULL,
+    gid INTEGER NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (puid) REFERENCES users(puid),
+    FOREIGN KEY (gid) REFERENCES groups(id)
+);
+
 -- FIXME: Placeholder data
 
 INSERT INTO groups (name, concrete)
-    VALUES ('Example Group', true);
+    VALUES ('Example Group 1', true);
+INSERT INTO groups (name, concrete)
+    VALUES ('Example Group 2', true);
 INSERT INTO blips (gid, title, summary, link)
     VALUES (1, 'Blip 1 Title', 'This is a summary of a blip.', 'http://alphaproject.me');
 INSERT INTO blips (gid, title, summary, link)
@@ -49,9 +78,17 @@ INSERT INTO blips (gid, title, summary, link)
 INSERT INTO blips (gid, title, summary, link)
     VALUES (1, 'Blip 3 Title', 'This is a summary of a blip.', 'http://alphaproject.me');
 INSERT INTO interests (name)
-    VALUES ('Example Interest');
+    VALUES ('Example Interest 1');
+INSERT INTO interests (name)
+    VALUES ('Example Interest 2');
+INSERT INTO interests (name)
+    VALUES ('Example Interest 3');
 INSERT INTO group_interests (gid, iid)
     VALUES (1, 1);
+INSERT INTO group_interests (gid, iid)
+    VALUES (1, 2);
+INSERT INTO group_interests (gid, iid)
+    VALUES (2, 1);
 
 # --- !Downs
 
