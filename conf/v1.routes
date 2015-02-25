@@ -2,6 +2,7 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+
 GET     /api/v1/blip                controllers.BlipController.list()
 POST    /api/v1/blip                controllers.BlipController.create()
 GET     /api/v1/blip/:id            controllers.BlipController.get(id: Long)
@@ -15,9 +16,4 @@ PUT     /api/v1/group/:id           controllers.GroupController.update(id: Long)
 DELETE  /api/v1/group/:id           controllers.GroupController.delete(id: Long)
 GET     /api/v1/group/search        controllers.GroupController.search()
 
-#CAS
-GET     /api/v1/cas/callback        org.pac4j.play.CallbackController.callback()
-POST    /api/v1/cas/callback        org.pac4j.play.CallbackController.callback()
-GET     /api/v1/cas/proxyCallback   org.pac4j.play.CallbackController.callback()
-POST    /api/v1/cas/proxyCallback   org.pac4j.play.CallbackController.callback()
-GET     /api/v1/cas/logout          org.pac4j.play.CallbackController.logoutAndRedirect()
+OPTIONS /*all                controllers.ApiHeaderController.options(all: String)
