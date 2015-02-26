@@ -34,7 +34,7 @@ object BlipController extends Controller {
 
     def create(blip: Blip): Unit = {
       DB.withConnection { implicit c =>
-      val results: Blip = SQL("""
+      SQL("""
         INSERT INTO blips(title, summary, link, time, address, lat, lng) 
         VALUES ({title}, {summary}, {link}, {time}, {address}, {lat}, {lng})
         """)
