@@ -14,7 +14,7 @@ object BlipController extends Controller {
         def writes(blip: Blip): JsValue = Json.obj(
             "id" -> blip.id,
             "gid" -> blip.gid,
-            "name" -> blip.name,
+            "title" -> blip.title,
             "summary" -> blip.summary,
             "link" -> blip.link,
             "time" -> blip.time,
@@ -32,8 +32,23 @@ object BlipController extends Controller {
         }
     }
 
-    def create = TODO
-
+    def create(blip: Blip): Unit = {
+      DB.withConnection { implicit c =>
+      val results: Blip = SQL("""
+        INSERT INTO blips(title, summary, link, time, address, lat, lng) 
+        VALUES ({title}, {summary}, {link}, {time}, {address}, {lat}, {lng})
+        """)
+      .on(
+        "title" -> blip.title,
+        "summary" -> blip.summary,
+        "link" -> blip.link,
+        "time" -> blip.time,
+        "address" -> blip.address,
+        "lat" -> blip.lat,
+        "lng" -> blip.lng).executeUpdate()
+    }
+  }
+        
     def get(id: Long) = Action {
         DB.withConnection { implicit c =>
             val result: Blip = SQL("SELECT * FROM blips WHERE id = {id}")
