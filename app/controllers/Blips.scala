@@ -88,6 +88,15 @@ object BlipController extends Controller {
         SET title={title}, summary={summary}, link={link}, time={time}, address={address}, lat={lat}, lng={lng}
         WHERE id={id}
         """)
+      .on(
+         "gid" -> blip.gid,
+         "title" -> blip.title,
+         "summary" -> blip.summary,
+         "link" -> blip.link,
+         "time" -> blip.time,
+         "address" -> blip.address,
+         "lat" -> blip.lat,
+         "lng" -> blip.lng).executeUpdate()
     }
     Ok
   }
@@ -99,6 +108,9 @@ object BlipController extends Controller {
         DELETE FROM TABLE blips
         WHERE id={id}
         """)
+      .on(
+        "id" -> id
+      ).executeUpdate()
     }
     Ok
   }
