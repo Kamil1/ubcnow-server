@@ -14,7 +14,7 @@ object BlipController extends Controller {
         def writes(blip: Blip): JsValue = Json.obj(
             "id" -> blip.id,
             "gid" -> blip.gid,
-            "name" -> blip.name,
+            "title" -> blip.title,
             "summary" -> blip.summary,
             "link" -> blip.link,
             "time" -> blip.time,
@@ -22,6 +22,20 @@ object BlipController extends Controller {
             "lat" -> blip.lat,
             "lng" -> blip.lng)
     }
+
+    def jsonToBlip(json: JsValue) : Blip = {
+      return Blip(
+        0,
+        (json \ "gid").as[Long],
+        (json \ "title").as[String],
+        (json \ "summary").as[Option[String]],
+        (json \ "link").as[Option[String]],
+        (json \ "time").as[Option[String]],
+        (json \ "address").as[Option[String]],
+        (json \ "lat").as[Option[Double]],
+        (json \ "lng").as[Option[Double]]
+      )
+  }
 
     def list = Action {
         DB.withConnection { implicit c =>
@@ -32,7 +46,27 @@ object BlipController extends Controller {
         }
     }
 
-    def create = TODO
+    def create() = Action(parse.json) { request =>
+      val json: JsValue = request.body
+      val blip = jsonToBlip(json)
+
+      DB.withConnection { implicit c =>
+      SQL("""
+         INSERT INTO blips(gid, title, summary, link, time, address, lat, lng)
+         VALUES ({gid}, {title}, {summary}, {link}, {time}, {address}, {lat}, {lng})
+         """)
+       .on(
+         "gid" -> blip.gid,
+         "title" -> blip.title,
+         "summary" -> blip.summary,
+         "link" -> blip.link,
+         "time" -> blip.time,
+         "address" -> blip.address,
+         "lat" -> blip.lat,
+         "lng" -> blip.lng).executeUpdate()
+     }
+    Ok
+  }
 
     def get(id: Long) = Action {
         DB.withConnection { implicit c =>
@@ -44,9 +78,43 @@ object BlipController extends Controller {
         }
     }
 
-    def update(id: Long) = TODO
+    def update(id: Long) = Action(parse.json) { request =>
+      val json: JsValue = request.body
+      val blip = jsonToBlip(json)
 
-    def delete(id: Long) = TODO
+      DB.withConnection { implicit c =>
+      SQL("""
+        UPDATE blips
+        SET title={title}, summary={summary}, link={link}, time={time}, address={address}, lat={lat}, lng={lng}
+        WHERE id={id}
+        """)
+      .on(
+         "id" -> id,
+         "gid" -> blip.gid,
+         "title" -> blip.title,
+         "summary" -> blip.summary,
+         "link" -> blip.link,
+         "time" -> blip.time,
+         "address" -> blip.address,
+         "lat" -> blip.lat,
+         "lng" -> blip.lng).executeUpdate()
+    }
+    Ok
+  }
+
+
+    def delete(id: Long) = Action {
+      DB.withConnection { implicit c =>
+      SQL("""
+        DELETE FROM blips
+        WHERE id={id}
+        """)
+      .on(
+        "id" -> id
+      ).executeUpdate()
+    }
+    Ok
+  }
 
     def matchBlip: PartialFunction[Row,Blip] = {
         case Row(id: Int,
