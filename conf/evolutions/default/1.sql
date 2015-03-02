@@ -15,7 +15,7 @@ CREATE TABLE blips (
     title VARCHAR(255) NOT NULL,
     summary VARCHAR(255),
     link VARCHAR(255),
-    time DATE,
+    time VARCHAR(255),
     address VARCHAR(255),
     lat FLOAT,
     lng FLOAT,
