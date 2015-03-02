@@ -89,6 +89,7 @@ object BlipController extends Controller {
         WHERE id={id}
         """)
       .on(
+         "id" -> id,
          "gid" -> blip.gid,
          "title" -> blip.title,
          "summary" -> blip.summary,
@@ -105,7 +106,7 @@ object BlipController extends Controller {
     def delete(id: Long) = Action {
       DB.withConnection { implicit c =>
       SQL("""
-        DELETE FROM TABLE blips
+        DELETE FROM blips
         WHERE id={id}
         """)
       .on(
