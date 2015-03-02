@@ -23,6 +23,12 @@ object BlipController extends Controller {
             "lng" -> blip.lng)
     }
 
+//  implicit val blipReads = new Reads[Blip] {
+//    def reads(js: JsValue): Blip = Blip(
+//      id: (js \ "id").as[Long],
+//      gid:
+
+
     def list = Action {
         DB.withConnection { implicit c =>
             val results: List[Blip] = SQL("SELECT * FROM blips")()
@@ -32,23 +38,41 @@ object BlipController extends Controller {
         }
     }
 
-    def create(blip: Blip): Unit = {
+    def create() = Action(parse.json) { request =>
+      val json: JsValue = request.body
+      val gid = (json \ "gid").as[Long]
+      val title = (json \ "title").as[String]
+      val summary = (json \ "summary").as[String]
+      val link = (json \ "link").as[String]
+      val time = (json \ "time").as[String]
+      val address = (json \ "address").as[String]
+      val lat = (json \ "lat").as[Double]
+      val lng = (json \ "lng").as[Double]
+
       DB.withConnection { implicit c =>
       SQL("""
-        INSERT INTO blips(title, summary, link, time, address, lat, lng) 
-        VALUES ({title}, {summary}, {link}, {time}, {address}, {lat}, {lng})
-        """)
-      .on(
-        "title" -> blip.title,
-        "summary" -> blip.summary,
-        "link" -> blip.link,
-        "time" -> blip.time,
-        "address" -> blip.address,
-        "lat" -> blip.lat,
-        "lng" -> blip.lng).executeUpdate()
-    }
+         INSERT INTO blips(gid, title, summary, link, time, address, lat, lng)
+         VALUES ({gid}, {title}, {summary}, {link}, {time}, {address}, {lat}, {lng})
+         """)
+       .on(
+         "gid" -> gid,
+         "title" -> title,
+         "summary" -> summary,
+         "link" -> link,
+         "time" -> time,
+         "address" -> address,
+         "lat" -> lat,
+         "lng" -> lng).executeUpdate()
+     }
+    Ok
   }
-        
+
+  // def saveBlip = Action { request =>
+  //   val json = request.body.asJson.get
+  //   val blip = Blip.save(json)
+  //   Ok
+  // }
+
     def get(id: Long) = Action {
         DB.withConnection { implicit c =>
             val result: Blip = SQL("SELECT * FROM blips WHERE id = {id}")

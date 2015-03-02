@@ -1,4 +1,5 @@
 package models
+import scala.util.parsing.json
 
 case class Blip(
     id: Long,
@@ -11,3 +12,5 @@ case class Blip(
     lat: Option[Double] = None,
     lng: Option[Double] = None
 )
+
+
