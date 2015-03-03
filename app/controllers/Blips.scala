@@ -85,7 +85,13 @@ object BlipController extends Controller {
       DB.withConnection { implicit c =>
       SQL("""
         UPDATE blips
-        SET title={title}, summary={summary}, link={link}, time={time}, address={address}, lat={lat}, lng={lng}
+        SET title=ISNULL({title}, title), 
+            summary=ISNULL({summary},summary),
+            link=ISNULL({link}, link),
+            time=ISNULL({time}, time),
+            address=ISNULL({address}, address),
+            lat=ISNULL({lat}, lat),
+            lng=ISNULL({lng}, lng)
         WHERE id={id}
         """)
       .on(
