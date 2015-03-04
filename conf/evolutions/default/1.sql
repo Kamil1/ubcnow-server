@@ -30,7 +30,7 @@ CREATE TABLE interests (
 );
 
 CREATE TABLE users (
-    puid INTEGER NOT NULL AUTO_INCREMENT,
+    puid INTEGER NOT NULL,
     studentNumber INTEGER,
     affiliation VARCHAR(255) NOT NULL,
     firstName VARCHAR(255) NOT NULL,

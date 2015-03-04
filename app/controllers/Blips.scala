@@ -23,7 +23,8 @@ object BlipController extends Controller {
             "lng" -> blip.lng)
     }
 
-    def jsonToBlip(json: JsValue) : Blip = {
+    // WARNING: RETURNS DUMMY ID VALUE
+    private def jsonToBlip(json: JsValue) : Blip = {
       return Blip(
         0,
         (json \ "gid").as[Long],
@@ -35,7 +36,15 @@ object BlipController extends Controller {
         (json \ "lat").as[Option[Double]],
         (json \ "lng").as[Option[Double]]
       )
-  }
+    }
+
+    private def mapBlipToUsers(blip: Blip){
+      DB.withConnection { implicit c =>
+        SQL("""
+            INSERT INTO 
+            """)
+      }
+    }
 
     def list = Action {
         DB.withConnection { implicit c =>
@@ -46,7 +55,7 @@ object BlipController extends Controller {
         }
     }
 
-    def create() = Action(parse.json) { request =>
+    def create = Action(parse.json) { request =>
       val json: JsValue = request.body
       val blip = jsonToBlip(json)
 
