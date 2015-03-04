@@ -6,6 +6,8 @@ import play.api.mvc._
 import play.api.db._
 import play.api.libs.json._
 import anorm._
+import play.api.libs.functional.syntax._
+import play.api.data.validation.ValidationError
 import models.User
 
 object UserController extends Controller {
@@ -21,17 +23,15 @@ object UserController extends Controller {
       "groups" -> user.groups)
   }
 
-  private def jsonToUser(json: JsValue) : User = {
-    return User(
-      (json \ "puid").as[Long],
-      (json \ "studentNumber").as[Option[Long]],
-      (json \ "affiliation").as[String],
-      (json \ "firstName").as[String],
-      (json \ "lastName").as[String],
-      (json \ "interests").as[Option[List[Long]]],
-      (json \ "groups").as[Option[List[Long]]]
-      )
-  }
+    implicit val userReads : Reads[User] = (
+      (__ \ "puid").read[Long] and
+      (__ \ "studentNumber").read[Option[Long]] and
+      (__ \ "affiliation").read[String] and
+      (__ \ "firstName").read[String] and
+      (__ \ "lastName").read[String] and
+      (__ \ "interests").read[Option[List[Int]]] and
+      (__ \ "groups").read[Option[List[Int]]]
+  )(User)
 
   def list = Action {
     DB.withConnection { implicit c =>
@@ -44,7 +44,7 @@ object UserController extends Controller {
 
   def create = Action(parse.json) { request =>
     val json: JsValue = request.body
-    val user = jsonToUser(json)
+    val user = json.as[User]
 
     DB.withConnection { implicit c =>
       SQL("""
@@ -122,8 +122,8 @@ object UserController extends Controller {
       affiliation: String,
       firstName: String,
       lastName: String,
-      interests: Option[List[Long]],
-      groups: Option[List[Long]]
+      interests: Option[List[Int]],
+      groups: Option[List[Int]]
       ) => User(puid, studentNumber, affiliation, firstName, lastName, interests, groups)
   }
 

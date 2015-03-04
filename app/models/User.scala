@@ -6,6 +6,6 @@ case class User (
   affiliation: String,
   firstName: String,
   lastName: String,
-  interests: Option[List[Long]],
-  groups: Option[List[Long]]
+  interests: Option[List[Int]],
+  groups: Option[List[Int]]
 )
