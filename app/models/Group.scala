@@ -3,8 +3,8 @@ package models
 import scala.collection.mutable.ArrayBuffer
 
 case class Group(
-    gid: Int,
+    gid: Long,
     name: String, 
     concrete: Boolean,
-    interests: ArrayBuffer[Int]
+    interests: ArrayBuffer[Long]
 )

@@ -6,6 +6,7 @@ import play.api.mvc._
 import play.api.db._
 import play.api.libs.json._
 import anorm._
+import play.api.libs.functional.syntax._
 import play.api.libs.json.Json.JsValueWrapper
 import scala.collection.mutable.ArrayBuffer
 import models.Group
@@ -19,6 +20,13 @@ object GroupController extends Controller {
         "interests" -> group.interests,
         "concrete" -> group.concrete)
     }
+
+    implicit val groupReads : Reads[Group] = (
+        (__ \ "gid").read[Long] and
+        (__ \ "name").read[String] and
+        (__ \ "interests").read[ArrayBuffer[Long]] and
+        (__ \ "concrete").read[Boolean]
+        )(Group)
 
     def list = Action {
       DB.withConnection { implicit c =>
@@ -46,11 +54,64 @@ object GroupController extends Controller {
     }
     
 
-    def create = TODO
+    def create = Action(parse.json) { request =>
+        val json: JsVale = request.body
+        val group = json.as[Group]
+
+        DB.withTransaction { implicit c =>
+            SQL("""
+                INSERT INTO groups(name, concrete)
+                VALUES ({name}, {concrete})
+                """)
+            .on(
+                "name" -> group.name,
+                "concrete" -> group.name)
+            for (interest <- group.interests) {
+                SQL("""
+                    INSERT INTO group_interests(gid, iid)
+                    VALUES ({gid}, {interest})
+                    """)
+                .on(
+                    "gid" -> group.gid,
+                    "iid" -> interest)
+            }
+        }
+        Ok
+    }
 
     def get(gid: Long) = TODO   
     
-    def update(gid: Long) = TODO
+    def update(gid: Long) = Action(parse.json) { request =>
+        val json: JsValue = request.body
+        val group = json.as[Group]
+
+        DB.withConnection { implicit c =>
+            SQL("""
+                UPDATE groups
+                SET name=ISNULL({name}, name),
+                concrete = ISNULL({concrete}, concrete)
+                WHERE gid={gid}
+                """)
+            .on(
+                "name" -> group.name,
+                "concrete" -> group.concrete,
+                "gid" -> group.gid)
+            SQL("""
+                DELETE FROM group_interests
+                WHERE gid={gid}
+                """)
+            .on("gid" -> group.gid)
+            for ( interest <- group.interests)
+            SQL("""
+                INSERT INTO group_interests(gid ,iid)
+                VALES ({gid}, {interest})
+                """)
+            .on(
+                "gid" -> group.gid,
+                "interest" -> interest)
+        }
+        Ok
+    }
     
     def delete(gid: Long) = TODO
 

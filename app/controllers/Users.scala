@@ -29,8 +29,8 @@ object UserController extends Controller {
       (__ \ "affiliation").read[String] and
       (__ \ "firstName").read[String] and
       (__ \ "lastName").read[String] and
-      (__ \ "interests").read[Option[List[Int]]] and
-      (__ \ "groups").read[Option[List[Int]]]
+      (__ \ "interests").read[List[Long]] and
+      (__ \ "groups").read[List[Long]]
   )(User)
 
   def list = Action {
@@ -46,7 +46,7 @@ object UserController extends Controller {
     val json: JsValue = request.body
     val user = json.as[User]
 
-    DB.withConnection { implicit c =>
+    DB.withTransaction { implicit c =>
       SQL("""
         INSERT INTO users(puid, studentNumber, affiliation, firstName, lastName)
         VALUES ({puid}, {studentNumber}, {affiliation}, {firstName}, {lastName})
@@ -57,14 +57,23 @@ object UserController extends Controller {
         "affiliation" -> user.affiliation,
         "firstName" -> user.firstName,
         "lastName" -> user.lastName).executeUpdate()
-      for( a <- user.interests ){
+      for( interest <- user.interests ) {
         SQL("""
           INSERT INTO user_interests(puid, iid)
-          VALUES ({puid}, {a})
+          VALUES ({puid}, {interest})
           """)
         .on(
           "puid" -> user.puid,
-          "a" -> a)
+          "interest" -> interest)
+      }
+      for ( group <- user.groups) {
+        SQL("""
+          INSERT INTO user_groups(puid, gid)
+          VALUES ({puid}, {group})
+          """)
+        .on(
+          "puid" -> user.puid,
+          "group" -> group)
       }
     }
     Ok
@@ -82,7 +91,7 @@ object UserController extends Controller {
 
   def update(puid: Long) = Action(parse.json) { request =>
     val json: JsValue = request.body
-    val user = jsonToUser(json)
+    val user = json.as[User]
 
     DB.withConnection { implicit c =>
       SQL("""
@@ -122,8 +131,8 @@ object UserController extends Controller {
       affiliation: String,
       firstName: String,
       lastName: String,
-      interests: Option[List[Int]],
-      groups: Option[List[Int]]
+      interests: List[Long],
+      groups: List[Long]
       ) => User(puid, studentNumber, affiliation, firstName, lastName, interests, groups)
   }
 

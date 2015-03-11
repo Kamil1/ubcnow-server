@@ -38,14 +38,6 @@ object BlipController extends Controller {
       )
     }
 
-    private def mapBlipToUsers(blip: Blip){
-      DB.withConnection { implicit c =>
-        SQL("""
-            INSERT INTO 
-            """)
-      }
-    }
-
     def list = Action {
         DB.withConnection { implicit c =>
             val results: List[Blip] = SQL("SELECT * FROM blips")()
