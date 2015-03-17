@@ -24,8 +24,8 @@ object GroupController extends Controller {
     implicit val groupReads : Reads[Group] = (
         (__ \ "gid").read[Long] and
         (__ \ "name").read[String] and
-        (__ \ "interests").read[ArrayBuffer[Long]] and
-        (__ \ "concrete").read[Boolean]
+        (__ \ "concrete").read[Boolean] and
+        (__ \ "interests").read[ArrayBuffer[Long]]
         )(Group)
 
     def list = Action {
@@ -55,7 +55,7 @@ object GroupController extends Controller {
     
 
     def create = Action(parse.json) { request =>
-        val json: JsVale = request.body
+        val json: JsValue = request.body
         val group = json.as[Group]
 
         DB.withTransaction { implicit c =>
@@ -79,7 +79,30 @@ object GroupController extends Controller {
         Ok
     }
 
-    def get(gid: Long) = TODO   
+    def get(gid: Long) = Action {
+        DB.withConnection { implicit c =>
+            val results: Group = SQL(
+            """SELECT * FROM blips
+            WHERE gid = {gid}
+            LEFT OUTER JOIN group_interests
+            ON groups.id = group_interests.gid
+            """)()
+            .foldLeft(Group) { (base, row) =>
+                row match {
+                    case Row(gid: Int, name: String, concrete: Boolean, _, _, iid: Int) => {
+                        if (base.gid == gid) {
+                            base.interests += iid
+                            base
+                        } else {
+                            Group(gid, name, concrete, ArrayBuffer(iid)) :: base
+                        }
+                    }
+                    case _ => base
+                }
+            }
+            Ok(Json.toJson(results))
+        }
+    }
     
     def update(gid: Long) = Action(parse.json) { request =>
         val json: JsValue = request.body
