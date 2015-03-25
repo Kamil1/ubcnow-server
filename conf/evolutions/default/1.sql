@@ -75,7 +75,7 @@ INSERT INTO groups (name, concrete)
 INSERT INTO blips (gid, title, summary, link, time)
     VALUES (1, 'Blip 1 Title', 'This is a summary of a blip.', 'http://alphaproject.me', NOW());
 INSERT INTO blips (gid, title, summary, link, lat, lng)
-    VALUES (1, 'Blip 2 Title', 'This is a summary of a blip.', 'http://alphaproject.me', 48.28, 132.1);
+    VALUES (1, 'Blip 2 Title', 'This is a summary of a blip.', 'http://alphaproject.me', -123.1, 49.28);
 INSERT INTO blips (gid, title, summary, link)
     VALUES (1, 'Blip 3 Title', 'This is a summary of a blip.', 'http://alphaproject.me');
 INSERT INTO interests (name)
