@@ -15,6 +15,7 @@ CREATE TABLE blips (
     title VARCHAR(255) NOT NULL,
     summary VARCHAR(255),
     link VARCHAR(255),
+    -- TODO: FIX THIS KAMIL! GOD DAMN! THIS SHOULD BE A DATE!
     time VARCHAR(255),
     address VARCHAR(255),
     lat FLOAT,
@@ -71,10 +72,10 @@ INSERT INTO groups (name, concrete)
     VALUES ('Example Group 1', true);
 INSERT INTO groups (name, concrete)
     VALUES ('Example Group 2', true);
-INSERT INTO blips (gid, title, summary, link)
-    VALUES (1, 'Blip 1 Title', 'This is a summary of a blip.', 'http://alphaproject.me');
-INSERT INTO blips (gid, title, summary, link)
-    VALUES (1, 'Blip 2 Title', 'This is a summary of a blip.', 'http://alphaproject.me');
+INSERT INTO blips (gid, title, summary, link, time)
+    VALUES (1, 'Blip 1 Title', 'This is a summary of a blip.', 'http://alphaproject.me', NOW());
+INSERT INTO blips (gid, title, summary, link, lat, lng)
+    VALUES (1, 'Blip 2 Title', 'This is a summary of a blip.', 'http://alphaproject.me', 48.28, 132.1);
 INSERT INTO blips (gid, title, summary, link)
     VALUES (1, 'Blip 3 Title', 'This is a summary of a blip.', 'http://alphaproject.me');
 INSERT INTO interests (name)
