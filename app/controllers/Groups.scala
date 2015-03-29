@@ -82,15 +82,15 @@ object GroupController extends Controller {
     def get(gid: Long) = Action {
         DB.withConnection { implicit c =>
             val results: Group = SQL(
-            """SELECT * FROM blips
+            """SELECT * FROM groups
             WHERE gid = {gid}
-            LEFT OUTER JOIN group_interests
+            RIGHT JOIN group_interests
             ON groups.id = group_interests.gid
             """)()
             .foldLeft(Group) { (base, row) =>
                 row match {
-                    case Row(gid: Int, name: String, concrete: Boolean, _, _, iid: Int) => {
-                        if (base.gid == gid) {
+                    case Row(gid: Int, name: String, concrete: Boolean, iid: Int) => {
+                        if (base.gid || base.gid == gid) {
                             base.interests += iid
                             base
                         } else {
