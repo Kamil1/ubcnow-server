@@ -6,5 +6,5 @@ case class Group(
     gid: Int,
     name: String, 
     concrete: Boolean,
-    interests: MutableList[Long]
+    interests: List[Long] = List[Long]()
 )
