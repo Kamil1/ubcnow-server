@@ -88,11 +88,15 @@ object UserController extends Controller {
 
   def get(puid: Long) = Action {
     DB.withTransaction { implicit c =>
-      val result: User = SQL("SELECT * FROM users WHERE puid = {puid}")
-      .on("puid" -> puid)()
-      .collect(matchUser)
-      .head
-      Ok(Json.toJson(result))
+      SQL("SELECT * FROM users WHERE puid = {puid")
+      .on("puid" -> puid)
+      .as(userRowParser singleOpt)
+      match {
+        case Some(User(puid, studentNumber, affiliation, firstName, lastName, _, _)) => {
+          Ok(Json.toJson(User(puid, studentNumber, affiliation, firstName, lastName, userInterests(puid).as(scalar[Long] *), userGroups(puid).as(scalar[Long] *))))
+        }
+        case None => NotFound
+      }
     }
   }
 
@@ -147,27 +151,24 @@ object UserController extends Controller {
   }
 
   def delete(puid: Long) = Action {
-    DB.withConnection { implicit c =>
+    DB.withTransaction { implicit c =>
       SQL("""
         DELETE FROM users
         WHERE puid={puid}
         """)
-      .on(
-        "puid" -> puid
-        )
+      .on("puid" -> puid)
+      SQL("""
+        DELETE FROM user_interests
+        WHERE puid={puid}
+        """)
+      .on("puid" -> puid)
+      SQL("""
+        DELETE FROM user_groups
+        WHERE puid={puid}
+        """)
+      .on("puid" -> puid)
     }
     Ok
-  }
-
-  def matchUser: PartialFunction[Row,User] = {
-    case Row(puid: Long,
-      studentNumber: Option[Long],
-      affiliation: String,
-      firstName: String,
-      lastName: String,
-      interests: ArrayBuffer[Long],
-      groups: ArrayBuffer[Long]
-      ) => User(puid, studentNumber, affiliation, firstName, lastName, interests, groups)
   }
 
   def userInterests = { puid: Long =>

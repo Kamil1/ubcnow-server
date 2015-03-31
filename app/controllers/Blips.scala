@@ -46,28 +46,6 @@ object BlipController extends Controller {
         }
     }
 
-<<<<<<< HEAD
-    def create = Action(parse.json) { request =>
-      val json: JsValue = request.body
-      val blip = jsonToBlip(json)
-
-      DB.withConnection { implicit c =>
-      SQL("""
-         INSERT INTO blips(gid, title, summary, link, time, address, lat, lng)
-         VALUES ({gid}, {title}, {summary}, {link}, {time}, {address}, {lat}, {lng})
-         """)
-       .on(
-         "gid" -> blip.gid,
-         "title" -> blip.title,
-         "summary" -> blip.summary,
-         "link" -> blip.link,
-         "time" -> blip.time,
-         "address" -> blip.address,
-         "lat" -> blip.lat,
-         "lng" -> blip.lng).executeUpdate()
-     }
-    Ok
-=======
     def create() = Action(parse.json) { request =>
       request.body.validate[Blip](blipReads) match {
         case s: JsSuccess[Blip] => {
@@ -92,7 +70,6 @@ object BlipController extends Controller {
         }
         case e: JsError => BadRequest(e.toString)
       }
->>>>>>> upstream/master
   }
 
     def get(id: Long) = Action {

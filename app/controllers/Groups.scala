@@ -21,12 +21,20 @@ object GroupController extends Controller {
         "interests" -> group.interests,
         "concrete" -> group.concrete)
     }
+
+    implicit val groupReads : Reads[Group] = (
+        (__ \ "gid").read[Long] and
+        (__ \ "name").read[String] and
+        (__ \ "concrete").read[Boolean] and
+        (__ \ "interests").read[List[Long]]
+        )(Group)
+
     val groupRowParser = int("id") ~ str("name") ~ bool("concrete") map {
         case id~name~concrete => Group(id, name, concrete)
     }
 
     def list = Action {
-      DB.withConnection { implicit c =>
+      DB.withTransaction { implicit c =>
           val results: List[Group] = SQL("SELECT * FROM groups")
             .as(groupRowParser *)
             .map { case Group(gid, name, concrete, _) =>
@@ -52,10 +60,9 @@ object GroupController extends Controller {
             for (interest <- group.interests) {
                 SQL("""
                     INSERT INTO group_interests(gid, iid)
-                    VALUES ({gid}, {interest})
+                    VALUES ({gid}, {iid})
                     """)
-                .on(
-                    "gid" -> group.gid,
+                .on("gid" -> group.gid,
                     "iid" -> interest)
             }
         }
@@ -80,12 +87,12 @@ object GroupController extends Controller {
         val json: JsValue = request.body
         val group = json.as[Group]
 
-        DB.withConnection { implicit c =>
+        DB.withTransaction { implicit c =>
             SQL("""
                 UPDATE groups
                 SET name=ISNULL({name}, name),
                 concrete = ISNULL({concrete}, concrete)
-                WHERE gid={gid}
+                WHERE iid={gid}
                 """)
             .on(
                 "name" -> group.name,
@@ -108,7 +115,21 @@ object GroupController extends Controller {
         Ok
     }
     
-    def delete(gid: Long) = TODO
+    def delete(gid: Long) = Action {
+        DB.withTransaction { implicit c =>
+            SQL("""
+                DELETE FROM groups
+                WHERE id={gid}
+                """)
+            .on("gid" -> gid)
+            SQL("""
+                DELETE FROM group_interests
+                WHERE gid={gid}
+                """)
+            .on("gid" -> gid)
+        }
+        Ok
+    }
 
     def search = TODO
 
