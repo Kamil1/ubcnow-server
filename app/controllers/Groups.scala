@@ -6,9 +6,13 @@ import play.api.mvc._
 import play.api.db._
 import play.api.libs.json._
 import anorm._
+<<<<<<< HEAD
 import play.api.libs.functional.syntax._
+=======
+import anorm.SqlParser._
+>>>>>>> upstream/master
 import play.api.libs.json.Json.JsValueWrapper
-import scala.collection.mutable.ArrayBuffer
+import java.sql.Connection
 import models.Group
 
 object GroupController extends Controller {
@@ -20,34 +24,16 @@ object GroupController extends Controller {
         "interests" -> group.interests,
         "concrete" -> group.concrete)
     }
-
-    implicit val groupReads : Reads[Group] = (
-        (__ \ "gid").read[Long] and
-        (__ \ "name").read[String] and
-        (__ \ "concrete").read[Boolean] and
-        (__ \ "interests").read[ArrayBuffer[Long]]
-        )(Group)
+    val groupRowParser = int("id") ~ str("name") ~ bool("concrete") map {
+        case id~name~concrete => Group(id, name, concrete)
+    }
 
     def list = Action {
       DB.withConnection { implicit c =>
-          val results: List[Group] = SQL(
-            """SELECT * FROM groups
-            LEFT OUTER JOIN group_interests
-            ON groups.id = group_interests.gid""")()
-            .foldLeft(List[Group]()) { (base, row) =>
-                row match {
-                    case Row(gid: Int, name: String, concrete: Boolean, _, _, iid: Int) => {
-                        if (base.length > 0 && base.last.gid == gid) {
-                            // Merge interests with last group.
-                            // FIXME: a bit hackish? neat though.
-                            base.last.interests += iid
-                            base
-                        } else {
-                            Group(gid, name, concrete, ArrayBuffer(iid)) :: base
-                        }
-                    }
-                    case _ => base
-                }
+          val results: List[Group] = SQL("SELECT * FROM groups")
+            .as(groupRowParser *)
+            .map { case Group(gid, name, concrete, _) =>
+                Group(gid, name, concrete, groupInterests(gid).as(scalar[Long] *))
             }
           Ok(Json.toJson(results))
       }
@@ -79,32 +65,19 @@ object GroupController extends Controller {
         Ok
     }
 
-    def get(gid: Long) = TODO
-    // Action {
-    //     DB.withConnection { implicit c =>
-    //         val results: Group = SQL(
-    //         """SELECT * FROM groups
-    //         WHERE gid = {gid}
-    //         RIGHT JOIN group_interests
-    //         ON groups.id = group_interests.gid
-    //         """)
-    //         .on("gid" -> gid)
-    //         .foldLeft(Group) { (base, row) =>
-    //             row match {
-    //                 case Row(gid: Int, name: String, concrete: Boolean, iid: Int) => {
-    //                     if (base.length > 0 && base.last.gid == gid) {
-    //                         base.interests += iid
-    //                         base
-    //                     } else {
-    //                         Group(gid, name, concrete, ArrayBuffer(iid)) :: base
-    //                     }
-    //                 }
-    //                 case _ => base
-    //             }
-    //         }
-    //         Ok(Json.toJson(results))
-    //     }
-    // }
+    def get(gid: Long) = Action {
+        DB.withTransaction { implicit c =>
+            SQL("SELECT * FROM groups WHERE id = {id}")
+                .on("id" -> gid)
+                .as(groupRowParser singleOpt)
+                match {
+                    case Some(Group(gid, name, concrete, _)) => {
+                        Ok(Json.toJson(Group(gid, name, concrete, groupInterests(gid).as(scalar[Long] *))))
+                    }
+                    case None => NotFound
+                }
+        }
+    }
     
     def update(gid: Long) = Action(parse.json) { request =>
         val json: JsValue = request.body
@@ -141,4 +114,12 @@ object GroupController extends Controller {
     def delete(gid: Long) = TODO
 
     def search = TODO
+
+    def groupInterests = { gid: Long =>
+        SQL("""SELECT interests.id FROM group_interests
+               RIGHT JOIN interests
+               ON group_interests.iid = interests.id
+               WHERE group_interests.gid = {gid}""")
+        .on("gid" -> gid)
+    }
 }

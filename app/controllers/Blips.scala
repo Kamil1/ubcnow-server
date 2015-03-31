@@ -5,38 +5,37 @@ import play.api.Play.current
 import play.api.mvc._
 import play.api.db._
 import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
 import anorm._
 import models.Blip
 
 object BlipController extends Controller {
 
-    implicit val blipWrites = new Writes[Blip] {
-        def writes(blip: Blip): JsValue = Json.obj(
-            "id" -> blip.id,
-            "gid" -> blip.gid,
-            "title" -> blip.title,
-            "summary" -> blip.summary,
-            "link" -> blip.link,
-            "time" -> blip.time,
-            "address" -> blip.address,
-            "lat" -> blip.lat,
-            "lng" -> blip.lng)
-    }
+    implicit val blipWrites: Writes[Blip] = (
+        (__ \ "id").writeNullable[Long] and
+        (__ \ "gid").writeNullable[Long] and
+        (__ \ "title").writeNullable[String] and
+        (__ \ "summary").writeNullable[String] and
+        (__ \ "link").writeNullable[String] and
+        (__ \ "time").writeNullable[String] and
+        (__ \ "address").writeNullable[String] and
+        (__ \ "lat").writeNullable[Double] and
+        (__ \ "lng").writeNullable[Double]
+    )(unlift(Blip.unapply))
 
-    // WARNING: RETURNS DUMMY ID VALUE
-    private def jsonToBlip(json: JsValue) : Blip = {
-      return Blip(
-        0,
-        (json \ "gid").as[Long],
-        (json \ "title").as[String],
-        (json \ "summary").as[Option[String]],
-        (json \ "link").as[Option[String]],
-        (json \ "time").as[Option[String]],
-        (json \ "address").as[Option[String]],
-        (json \ "lat").as[Option[Double]],
-        (json \ "lng").as[Option[Double]]
-      )
-    }
+
+    implicit val blipReads: Reads[Blip] = (
+        (__ \ "id").readNullable[Long] and
+        (__ \ "gid").readNullable[Long] and
+        (__ \ "title").readNullable[String] and
+        (__ \ "summary").readNullable[String] and
+        (__ \ "link").readNullable[String] and
+        (__ \ "time").readNullable[String] and
+        (__ \ "address").readNullable[String] and
+        (__ \ "lat").readNullable[Double] and
+        (__ \ "lng").readNullable[Double]
+    )(Blip.apply _)
 
     def list = Action {
         DB.withConnection { implicit c =>
@@ -47,6 +46,7 @@ object BlipController extends Controller {
         }
     }
 
+<<<<<<< HEAD
     def create = Action(parse.json) { request =>
       val json: JsValue = request.body
       val blip = jsonToBlip(json)
@@ -67,6 +67,32 @@ object BlipController extends Controller {
          "lng" -> blip.lng).executeUpdate()
      }
     Ok
+=======
+    def create() = Action(parse.json) { request =>
+      request.body.validate[Blip](blipReads) match {
+        case s: JsSuccess[Blip] => {
+          // Parsing was successful, commit to DB.
+          val blip: Blip = s.get
+          DB.withConnection { implicit c =>
+          SQL("""
+             INSERT INTO blips(gid, title, summary, link, time, address, lat, lng)
+             VALUES ({gid}, {title}, {summary}, {link}, {time}, {address}, {lat}, {lng})
+             """)
+           .on(
+             "gid" -> blip.gid,
+             "title" -> blip.title,
+             "summary" -> blip.summary,
+             "link" -> blip.link,
+             "time" -> blip.time,
+             "address" -> blip.address,
+             "lat" -> blip.lat,
+             "lng" -> blip.lng).executeUpdate()
+         }
+         Ok
+        }
+        case e: JsError => BadRequest(e.toString)
+      }
+>>>>>>> upstream/master
   }
 
     def get(id: Long) = Action {
@@ -80,33 +106,37 @@ object BlipController extends Controller {
     }
 
     def update(id: Long) = Action(parse.json) { request =>
-      val json: JsValue = request.body
-      val blip = jsonToBlip(json)
+      request.body.validate[Blip] match {
+        case s: JsSuccess[Blip] => {
+            val blip: Blip = s.get
+            DB.withConnection { implicit c =>
+              SQL("""
+                UPDATE blips
+                SET title=ISNULL({title}, title), 
+                    summary=ISNULL({summary},summary),
+                    link=ISNULL({link}, link),
+                    time=ISNULL({time}, time),
+                    address=ISNULL({address}, address),
+                    lat=ISNULL({lat}, lat),
+                    lng=ISNULL({lng}, lng)
+                WHERE id={id}
+                """)
+              .on(
+                 "id" -> id,
+                 "gid" -> blip.gid,
+                 "title" -> blip.title,
+                 "summary" -> blip.summary,
+                 "link" -> blip.link,
+                 "time" -> blip.time,
+                 "address" -> blip.address,
+                 "lat" -> blip.lat,
+                 "lng" -> blip.lng).executeUpdate()
+            }
+            Ok
+        }
+        case e: JsError => BadRequest(e.toString)
+      }
 
-      DB.withConnection { implicit c =>
-      SQL("""
-        UPDATE blips
-        SET title=ISNULL({title}, title), 
-            summary=ISNULL({summary},summary),
-            link=ISNULL({link}, link),
-            time=ISNULL({time}, time),
-            address=ISNULL({address}, address),
-            lat=ISNULL({lat}, lat),
-            lng=ISNULL({lng}, lng)
-        WHERE id={id}
-        """)
-      .on(
-         "id" -> id,
-         "gid" -> blip.gid,
-         "title" -> blip.title,
-         "summary" -> blip.summary,
-         "link" -> blip.link,
-         "time" -> blip.time,
-         "address" -> blip.address,
-         "lat" -> blip.lat,
-         "lng" -> blip.lng).executeUpdate()
-    }
-    Ok
   }
 
 
@@ -132,8 +162,9 @@ object BlipController extends Controller {
           time: Option[String],
           address: Option[String],
           lat: Option[Double],
-          lng: Option[Double]) => Blip(id, gid, title, summary, link, time,
-                                       address, lat, lng)
+          lng: Option[Double]) => Blip(Some[Long](id), Some[Long](gid),
+                                       Some[String](title), summary, link,
+                                       time, address, lat, lng)
     }
 
 }

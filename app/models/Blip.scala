@@ -2,15 +2,13 @@ package models
 import scala.util.parsing.json
 
 case class Blip(
-    id: Long,
-    gid: Long,
-    title: String,
-    summary: Option[String] = None,
-    link: Option[String] = None,
-    time: Option[String] = None,
-    address: Option[String] = None,
-    lat: Option[Double] = None,
-    lng: Option[Double] = None
+    id: Option[Long],
+    gid: Option[Long],
+    title: Option[String],
+    summary: Option[String],
+    link: Option[String],
+    time: Option[String],
+    address: Option[String],
+    lat: Option[Double],
+    lng: Option[Double]
 )
-
-

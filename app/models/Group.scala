@@ -1,10 +1,10 @@
 package models
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.MutableList
 
 case class Group(
     gid: Long,
     name: String, 
     concrete: Boolean,
-    interests: ArrayBuffer[Long]
+    interests: List[Long] = List[Long]()
 )
