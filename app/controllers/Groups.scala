@@ -6,11 +6,8 @@ import play.api.mvc._
 import play.api.db._
 import play.api.libs.json._
 import anorm._
-<<<<<<< HEAD
 import play.api.libs.functional.syntax._
-=======
 import anorm.SqlParser._
->>>>>>> upstream/master
 import play.api.libs.json.Json.JsValueWrapper
 import java.sql.Connection
 import models.Group

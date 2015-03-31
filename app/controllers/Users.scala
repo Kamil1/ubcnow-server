@@ -63,7 +63,7 @@ object UserController extends Controller {
         "studentNumber" -> user.studentNumber,
         "affiliation" -> user.affiliation,
         "firstName" -> user.firstName,
-        "lastName" -> user.lastName).executeUpdate()
+        "lastName" -> user.lastName)
       for( interest <- user.interests ) {
         SQL("""
           INSERT INTO user_interests(puid, iid)
@@ -87,7 +87,7 @@ object UserController extends Controller {
   }
 
   def get(puid: Long) = Action {
-    DB.withConnection { implicit c =>
+    DB.withTransaction { implicit c =>
       val result: User = SQL("SELECT * FROM users WHERE puid = {puid}")
       .on("puid" -> puid)()
       .collect(matchUser)
@@ -100,7 +100,7 @@ object UserController extends Controller {
     val json: JsValue = request.body
     val user = json.as[User]
 
-    DB.withConnection { implicit c =>
+    DB.withTransaction { implicit c =>
       SQL("""
         UPDATE users
         SET studentNumber=ISNULL({studentNumber}, studentNumber),
@@ -115,6 +115,33 @@ object UserController extends Controller {
         "affiliation" -> user.affiliation,
         "firstName" -> user.firstName,
         "lastName" -> user.lastName).executeUpdate()
+      SQL("""
+        DELETE FROM user_interests
+        WHERE puid = {puid}
+        """)
+      .on("puid" -> puid)
+      for( interest <- user.interests ) {
+        SQL("""
+          INSERT INTO user_interests(puid, iid)
+          VALUES ({puid}, {interest})
+          """)
+        .on(
+          "puid" -> user.puid,
+          "interest" -> interest)
+      }
+      SQL("""
+        DELETE FROM user_groups
+        WHERE puid = {puid}
+        """)
+      for ( group <- user.groups ) {
+        SQL("""
+          INSERT INTO user_groups(puid, gid)
+          VALUES ({puid}, {group})
+          """)
+        .on(
+          "puid" -> user.puid,
+          "group" -> group)
+      }
     }
     Ok
   }
@@ -127,7 +154,7 @@ object UserController extends Controller {
         """)
       .on(
         "puid" -> puid
-        ).executeUpdate()
+        )
     }
     Ok
   }
