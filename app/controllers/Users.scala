@@ -8,6 +8,7 @@ import play.api.libs.json._
 import anorm._
 import play.api.libs.functional.syntax._
 import play.api.data.validation.ValidationError
+import scala.collection.mutable.ArrayBuffer
 import models.User
 
 object UserController extends Controller {
@@ -29,15 +30,21 @@ object UserController extends Controller {
       (__ \ "affiliation").read[String] and
       (__ \ "firstName").read[String] and
       (__ \ "lastName").read[String] and
-      (__ \ "interests").read[List[Long]] and
-      (__ \ "groups").read[List[Long]]
+      (__ \ "interests").read[ArrayBuffer[Long]] and
+      (__ \ "groups").read[ArrayBuffer[Long]]
   )(User)
+
+  val userRowParser = int("puid") ~ int("studentNumber") ~ str("affiliation") ~ str("firstName") ~ str("lastName") map {
+    case puid~studentNumber~affiliation~firstName~lastName => User(puid, studentNumber, affiliation, firstName, lastName)
+  }
 
   def list = Action {
     DB.withConnection { implicit c =>
-      val results: List[User] = SQL("SELECT * FROM users")()
-      .collect(matchUser)
-      .toList
+      val results: List[User] = SQL("SELECT * FROM users")
+      .as(userRowParser *)
+      .map { case User(puid, studentNumber, affiliation, firstName, lastName, _, _) =>
+        User(puid, studentNumber, affiliation, firstName, lastName, userInterests(puid).as(scalar[Long] *), userGroups(puid).as(scalar[Long] *))
+      }
       Ok(Json.toJson(results))
     }
   }
@@ -66,7 +73,7 @@ object UserController extends Controller {
           "puid" -> user.puid,
           "interest" -> interest)
       }
-      for ( group <- user.groups) {
+      for ( group <- user.groups ) {
         SQL("""
           INSERT INTO user_groups(puid, gid)
           VALUES ({puid}, {group})
@@ -131,9 +138,29 @@ object UserController extends Controller {
       affiliation: String,
       firstName: String,
       lastName: String,
-      interests: List[Long],
-      groups: List[Long]
+      interests: ArrayBuffer[Long],
+      groups: ArrayBuffer[Long]
       ) => User(puid, studentNumber, affiliation, firstName, lastName, interests, groups)
+  }
+
+  def userInterests = { puid: Long =>
+    SQL("""
+      SELECT users.puid FROM user_interests
+      RIGHT JOIN interests
+      ON user_interests.iid = interests.id
+      WHERE user_interests.puid = {puid}
+      """)
+    .on("puid" -> puid)
+  }
+
+  def userGroups = { puid: Long =>
+    SQL("""
+      SELECT users.puid FROM user_groups
+      RIGHT JOIN groups
+      ON user_groups.gid = groups.id
+      WHERE user_groups.puid = {puid}
+      """)
+    .on("puid" -> puid)
   }
 
 }

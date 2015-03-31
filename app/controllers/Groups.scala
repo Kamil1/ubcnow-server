@@ -79,30 +79,32 @@ object GroupController extends Controller {
         Ok
     }
 
-    def get(gid: Long) = Action {
-        DB.withConnection { implicit c =>
-            val results: Group = SQL(
-            """SELECT * FROM groups
-            WHERE gid = {gid}
-            RIGHT JOIN group_interests
-            ON groups.id = group_interests.gid
-            """)()
-            .foldLeft(Group) { (base, row) =>
-                row match {
-                    case Row(gid: Int, name: String, concrete: Boolean, iid: Int) => {
-                        if (base.gid || base.gid == gid) {
-                            base.interests += iid
-                            base
-                        } else {
-                            Group(gid, name, concrete, ArrayBuffer(iid)) :: base
-                        }
-                    }
-                    case _ => base
-                }
-            }
-            Ok(Json.toJson(results))
-        }
-    }
+    def get(gid: Long) = TODO
+    // Action {
+    //     DB.withConnection { implicit c =>
+    //         val results: Group = SQL(
+    //         """SELECT * FROM groups
+    //         WHERE gid = {gid}
+    //         RIGHT JOIN group_interests
+    //         ON groups.id = group_interests.gid
+    //         """)
+    //         .on("gid" -> gid)
+    //         .foldLeft(Group) { (base, row) =>
+    //             row match {
+    //                 case Row(gid: Int, name: String, concrete: Boolean, iid: Int) => {
+    //                     if (base.length > 0 && base.last.gid == gid) {
+    //                         base.interests += iid
+    //                         base
+    //                     } else {
+    //                         Group(gid, name, concrete, ArrayBuffer(iid)) :: base
+    //                     }
+    //                 }
+    //                 case _ => base
+    //             }
+    //         }
+    //         Ok(Json.toJson(results))
+    //     }
+    // }
     
     def update(gid: Long) = Action(parse.json) { request =>
         val json: JsValue = request.body
