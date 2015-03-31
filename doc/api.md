@@ -49,7 +49,8 @@ A 'blip' is a general class of event that is propagated to a [group](#Groups)'s 
 | title      | String   | A user-readable event title.        | true     |
 | summary    | String   | A user-readable event summary.      | false    |
 | link       | String   | A link to the event's page.         | false    |
-| time       | Date     | The time of the event.              | false    |
+| startTime  | String   | The start time of the event.        | false    |
+| endTime    | String   | The end time of the event.          | false    |
 | address    | String   | User-readable address of location.  | false    |
 | lat        | Double   | Latitude of event location.         | false    |
 | lng        | Double   | Longitude of event location.        | false    |

@@ -16,7 +16,8 @@ CREATE TABLE blips (
     summary VARCHAR(255),
     link VARCHAR(255),
     -- TODO: FIX THIS KAMIL! GOD DAMN! THIS SHOULD BE A DATE!
-    time VARCHAR(255),
+    startTime VARCHAR(255),
+    endTime VARCHAR(255),
     address VARCHAR(255),
     lat FLOAT,
     lng FLOAT,
