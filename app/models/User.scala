@@ -1,13 +1,11 @@
 package models
 
-import scala.collection.mutable.ArrayBuffer
-
 case class User (
   puid: Long,
-  studentNumber: Option[Long] = None,
+  studentNumber: Long,
   affiliation: String,
   firstName: String,
   lastName: String,
-  interests: ArrayBuffer[Long],
-  groups: ArrayBuffer[Long]
+  interests: List[Long] = List[Long](),
+  groups: List[Long] = List[Long]()
 )

@@ -6,11 +6,14 @@ import play.api.mvc._
 import play.api.db._
 import play.api.libs.json._
 import anorm._
+import play.api.libs.functional.syntax._
+import java.sql.Connection
+import play.api.libs.json.Json.JsValueWrapper
+import anorm.SqlParser._
 
 case class Interest(
   iid: Long,
-  name: String,
-  groups: List[Long]
+  name: String
 )
 
 
@@ -19,9 +22,13 @@ object InterestController extends Controller {
   implicit val interestWrites = new Writes[Interest] {
     def writes(interest: Interest): JsValue = Json.obj(
       "iid" -> interest.iid,
-      "name" -> interest.name,
-      "groups" -> interest.groups)
+      "name" -> interest.name)
   }
+
+  implicit val interestReads : Reads[Interest] = (
+    (__ \ "iid").read[Long] and
+    (__ \ "name").read[String]
+    )(Interest)
 
   val interestRowParser = int("id") ~ str("name") map {
     case id~name => Interest(id, name)
@@ -31,9 +38,6 @@ object InterestController extends Controller {
     DB.withTransaction { implicit c =>
     val results: List[Interest] = SQL("SELECT * FROM interests")
     .as(interestRowParser *)
-    .map { case Interest(id, name, _) => 
-      Interest(id, name, interestGroups(id).as(scalar[Long] *))
-    }
     Ok(Json.toJson(results))
   }
 }
@@ -47,24 +51,15 @@ object InterestController extends Controller {
         INSERT INTO interests(name)
         VALUES ({name})
         """)
-      .on("name" -> interest.name)
-      for ( group <- interest.groups) {
-        SQL("""
-          INSERT INTO group_interests(gid, iid)
-          VALUES ({gid}, {iid})
-          """)
-        .on("gid" -> group,
-            "iid" -> interest.iid)
-      }
+      .on("name" -> interest.name)()
     }
+    Ok //It worked trust me TODO
   }
 
   def get(iid: Long) = Action{
     DB.withConnection { implicit c =>
-    val result: Interest = SQL("select * from interest where iid = {iid}")().collect {
-      case Row(iid: Long,
-        name: String,
-        groups: Long) => Interest(iid, name, groups)
+    val result: Interest = SQL("SELECT * FROM interest WHERE iid = {iid}")().collect {
+      case Row(iid: Long, name: String) => Interest(iid, name)
     }.head
     Ok(Json.toJson(result))
   }
@@ -74,14 +69,5 @@ object InterestController extends Controller {
 
   def delete(iid: Long) = TODO
 
-  def interestGroups = { iid: Long =>
-    SQL("""
-      SELECT groups.id FROM group_interests
-      RIGHT JOIN groups
-      ON group_interests.gid = groups.id
-      WHERE group_interests.iid = {iid}
-      """)
-    .on("iid" -> iid)
-  }
 }
 

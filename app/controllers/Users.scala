@@ -10,6 +10,7 @@ import play.api.libs.functional.syntax._
 import play.api.data.validation.ValidationError
 import scala.collection.mutable.ArrayBuffer
 import models.User
+import anorm.SqlParser._
 
 object UserController extends Controller {
 
@@ -26,12 +27,12 @@ object UserController extends Controller {
 
     implicit val userReads : Reads[User] = (
       (__ \ "puid").read[Long] and
-      (__ \ "studentNumber").read[Option[Long]] and
+      (__ \ "studentNumber").read[Long] and
       (__ \ "affiliation").read[String] and
       (__ \ "firstName").read[String] and
       (__ \ "lastName").read[String] and
-      (__ \ "interests").read[ArrayBuffer[Long]] and
-      (__ \ "groups").read[ArrayBuffer[Long]]
+      (__ \ "interests").read[List[Long]] and
+      (__ \ "groups").read[List[Long]]
   )(User)
 
   val userRowParser = int("puid") ~ int("studentNumber") ~ str("affiliation") ~ str("firstName") ~ str("lastName") map {
