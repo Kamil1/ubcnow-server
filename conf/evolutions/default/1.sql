@@ -13,11 +13,10 @@ CREATE TABLE blips (
     id INTEGER NOT NULL AUTO_INCREMENT,
     gid INTEGER NOT NULL,
     title VARCHAR(255) NOT NULL,
-    summary VARCHAR(255),
+    summary TEXT,
     link VARCHAR(255),
-    -- TODO: FIX THIS KAMIL! GOD DAMN! THIS SHOULD BE A DATE!
-    startTime VARCHAR(255),
-    endTime VARCHAR(255),
+    startTime DATE(255),
+    endTime DATE(255),
     address VARCHAR(255),
     lat FLOAT,
     lng FLOAT,
@@ -32,12 +31,13 @@ CREATE TABLE interests (
 );
 
 CREATE TABLE users (
-    puid INTEGER NOT NULL,
+    id INTEGER NOT NULL AUTO_INCREMENT,
+    puid VARCHAR(255) NOT NULL,
     studentNumber INTEGER,
     affiliation VARCHAR(255) NOT NULL,
     firstName VARCHAR(255) NOT NULL,
     lastName VARCHAR(255) NOT NULL,
-    PRIMARY KEY (puid)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE group_interests (
@@ -54,7 +54,7 @@ CREATE TABLE user_interests (
     puid INTEGER NOT NULL,
     iid INTEGER NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (puid) REFERENCES users(puid),
+    FOREIGN KEY (puid) REFERENCES users(id),
     FOREIGN KEY (iid) REFERENCES interests(id)
 );
 
@@ -63,7 +63,7 @@ CREATE TABLE user_groups (
     puid INTEGER NOT NULL,
     gid INTEGER NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (puid) REFERENCES users(puid),
+    FOREIGN KEY (puid) REFERENCES users(id),
     FOREIGN KEY (gid) REFERENCES groups(id)
 );
 

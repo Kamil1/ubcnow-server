@@ -1,11 +1,11 @@
 package models
 
 case class User (
-  puid: Long,
+  id: Long,
+  puid: String,
   studentNumber: Long,
-  affiliation: String,
-  firstName: String,
-  lastName: String,
+  givenName: String,
+  sn: String,
   interests: List[Long] = List[Long](),
   groups: List[Long] = List[Long]()
 )

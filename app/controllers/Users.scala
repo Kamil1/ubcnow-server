@@ -16,35 +16,35 @@ object UserController extends Controller {
 
   implicit val userWrites = new Writes[User] {
     def writes(user: User): JsValue = Json.obj(
+      "id" -> user.id,
       "puid" -> user.puid,
       "studentNumber" -> user.studentNumber,
-      "affiliation" -> user.affiliation,
-      "firstName" -> user.firstName,
-      "lastName" -> user.lastName,
+      "givenName" -> user.firstName,
+      "sn" -> user.lastName,
       "interests" -> user.interests,
       "groups" -> user.groups)
   }
 
     implicit val userReads : Reads[User] = (
-      (__ \ "puid").read[Long] and
+      (__\ "id").read[Long] and
+      (__ \ "puid").read[String] and
       (__ \ "studentNumber").read[Long] and
-      (__ \ "affiliation").read[String] and
-      (__ \ "firstName").read[String] and
-      (__ \ "lastName").read[String] and
+      (__ \ "givenName").read[String] and
+      (__ \ "sn").read[String] and
       (__ \ "interests").read[List[Long]] and
       (__ \ "groups").read[List[Long]]
   )(User)
 
-  val userRowParser = int("puid") ~ int("studentNumber") ~ str("affiliation") ~ str("firstName") ~ str("lastName") map {
-    case puid~studentNumber~affiliation~firstName~lastName => User(puid, studentNumber, affiliation, firstName, lastName)
+  val userRowParser = int("id") ~ str("puid") ~ int("studentNumber") ~ str("givenName") ~ str("sn") map {
+    case id~puid~studentNumber~givenName~sn => User(puid, studentNumber, givenName, sn)
   }
 
   def list = Action {
     DB.withConnection { implicit c =>
       val results: List[User] = SQL("SELECT * FROM users")
       .as(userRowParser *)
-      .map { case User(puid, studentNumber, affiliation, firstName, lastName, _, _) =>
-        User(puid, studentNumber, affiliation, firstName, lastName, userInterests(puid).as(scalar[Long] *), userGroups(puid).as(scalar[Long] *))
+      .map { case User(id, puid, studentNumber, givenName, sn, _, _) =>
+        User(id, puid, studentNumber, givenName, sn, userInterests(puid).as(scalar[String] *), userGroups(puid).as(scalar[Long] *))
       }
       Ok(Json.toJson(results))
     }
@@ -56,52 +56,52 @@ object UserController extends Controller {
 
     DB.withTransaction { implicit c =>
       SQL("""
-        INSERT INTO users(puid, studentNumber, affiliation, firstName, lastName)
-        VALUES ({puid}, {studentNumber}, {affiliation}, {firstName}, {lastName})
+        INSERT INTO users(id, puid, studentNumber, givenName, sn)
+        VALUES ({id}, {puid}, {studentNumber}, {givenName}, {sn})
         """)
       .on(
+        "id" -> user.id,
         "puid" -> user.puid,
         "studentNumber" -> user.studentNumber,
-        "affiliation" -> user.affiliation,
-        "firstName" -> user.firstName,
-        "lastName" -> user.lastName)
+        "givenName" -> user.givenName,
+        "sn" -> user.sn)
       for( interest <- user.interests ) {
         SQL("""
-          INSERT INTO user_interests(puid, iid)
-          VALUES ({puid}, {interest})
+          INSERT INTO user_interests(id, iid)
+          VALUES ({id}, {interest})
           """)
         .on(
-          "puid" -> user.puid,
+          "id" -> user.id,
           "interest" -> interest)
       }
       for ( group <- user.groups ) {
         SQL("""
-          INSERT INTO user_groups(puid, gid)
-          VALUES ({puid}, {group})
+          INSERT INTO user_groups(id, gid)
+          VALUES ({id}, {group})
           """)
         .on(
-          "puid" -> user.puid,
+          "id" -> user.id,
           "group" -> group)
       }
     }
     Ok
   }
 
-  def get(puid: Long) = Action {
+  def get(id: Long) = Action {
     DB.withTransaction { implicit c =>
-      SQL("SELECT * FROM users WHERE puid = {puid")
-      .on("puid" -> puid)
+      SQL("SELECT * FROM users WHERE id = {id}")
+      .on("id" -> puid)
       .as(userRowParser singleOpt)
       match {
-        case Some(User(puid, studentNumber, affiliation, firstName, lastName, _, _)) => {
-          Ok(Json.toJson(User(puid, studentNumber, affiliation, firstName, lastName, userInterests(puid).as(scalar[Long] *), userGroups(puid).as(scalar[Long] *))))
+        case Some(User(id, puid, studentNumber, givenName, sn, _, _)) => {
+          Ok(Json.toJson(User(id, puid, studentNumber, givenName, sn, userInterests(puid).as(scalar[Long] *), userGroups(puid).as(scalar[Long] *))))
         }
         case None => NotFound
       }
     }
   }
 
-  def update(puid: Long) = Action(parse.json) { request =>
+  def update(id: Long) = Action(parse.json) { request =>
     val json: JsValue = request.body
     val user = json.as[User]
 
@@ -109,87 +109,86 @@ object UserController extends Controller {
       SQL("""
         UPDATE users
         SET studentNumber=ISNULL({studentNumber}, studentNumber),
-        affiliation=ISNULL({affiliation}, affiliation),
-        firstName=ISNULL({firstName}, firstName),
-        lastName=ISNULL({lastName}, lastName),
-        WHERE puid={puid}
+        givenName=ISNULL({givenName}, givenName),
+        sn=ISNULL({sn}, sn),
+        WHERE id={id}
         """)
       .on(
-        "puid" -> puid,
+        "id" -> id,
+        "puid" -> user.puid,
         "studentNumber" -> user.studentNumber,
-        "affiliation" -> user.affiliation,
-        "firstName" -> user.firstName,
-        "lastName" -> user.lastName).executeUpdate()
+        "givenName" -> user.givenName,
+        "sn" -> user.sn).executeUpdate()
       SQL("""
         DELETE FROM user_interests
-        WHERE puid = {puid}
+        WHERE id = {id}
         """)
-      .on("puid" -> puid)
+      .on("id" -> id)
       for( interest <- user.interests ) {
         SQL("""
-          INSERT INTO user_interests(puid, iid)
-          VALUES ({puid}, {interest})
+          INSERT INTO user_interests(id, iid)
+          VALUES ({id}, {interest})
           """)
         .on(
-          "puid" -> user.puid,
+          "id" -> user.id,
           "interest" -> interest)
       }
       SQL("""
         DELETE FROM user_groups
-        WHERE puid = {puid}
+        WHERE id = {id}
         """)
       for ( group <- user.groups ) {
         SQL("""
-          INSERT INTO user_groups(puid, gid)
-          VALUES ({puid}, {group})
+          INSERT INTO user_groups(id, gid)
+          VALUES ({id}, {group})
           """)
         .on(
-          "puid" -> user.puid,
+          "id" -> user.id,
           "group" -> group)
       }
     }
     Ok
   }
 
-  def delete(puid: Long) = Action {
+  def delete(id: Long) = Action {
     DB.withTransaction { implicit c =>
       SQL("""
         DELETE FROM users
-        WHERE puid={puid}
+        WHERE id={id}
         """)
-      .on("puid" -> puid)
+      .on("id" -> id)
       SQL("""
         DELETE FROM user_interests
-        WHERE puid={puid}
+        WHERE id={id}
         """)
-      .on("puid" -> puid)
+      .on("id" -> id)
       SQL("""
         DELETE FROM user_groups
-        WHERE puid={puid}
+        WHERE id={id}
         """)
-      .on("puid" -> puid)
+      .on("id" -> id)
     }
     Ok
   }
 
-  def userInterests = { puid: Long =>
+  def userInterests = { id: Long =>
     SQL("""
-      SELECT users.puid FROM user_interests
+      SELECT users.id FROM user_interests
       RIGHT JOIN interests
       ON user_interests.iid = interests.id
-      WHERE user_interests.puid = {puid}
+      WHERE user_interests.id = {id}
       """)
-    .on("puid" -> puid)
+    .on("id" -> id)
   }
 
-  def userGroups = { puid: Long =>
+  def userGroups = { id: Long =>
     SQL("""
-      SELECT users.puid FROM user_groups
+      SELECT users.id FROM user_groups
       RIGHT JOIN groups
       ON user_groups.gid = groups.id
-      WHERE user_groups.puid = {puid}
+      WHERE user_groups.id = {id}
       """)
-    .on("puid" -> puid)
+    .on("id" -> id)
   }
 
 }

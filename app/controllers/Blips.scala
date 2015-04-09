@@ -9,6 +9,8 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import anorm._
 import models.Blip
+import java.util.Date
+import org.joda.time._
 
 object BlipController extends Controller {
 
@@ -18,8 +20,8 @@ object BlipController extends Controller {
         (__ \ "title").writeNullable[String] and
         (__ \ "summary").writeNullable[String] and
         (__ \ "link").writeNullable[String] and
-        (__ \ "startTime").writeNullable[String] and
-        (__ \ "endTime").writeNullable[String] and
+        (__ \ "startTime").writeNullable[Date] and
+        (__ \ "endTime").writeNullable[Date] and
         (__ \ "address").writeNullable[String] and
         (__ \ "lat").writeNullable[Double] and
         (__ \ "lng").writeNullable[Double]
@@ -32,8 +34,8 @@ object BlipController extends Controller {
         (__ \ "title").readNullable[String] and
         (__ \ "summary").readNullable[String] and
         (__ \ "link").readNullable[String] and
-        (__ \ "startTime").readNullable[String] and
-        (__ \ "endTime").readNullable[String] and
+        (__ \ "startTime").readNullable[Date] and
+        (__ \ "endTime").readNullable[Date] and
         (__ \ "address").readNullable[String] and
         (__ \ "lat").readNullable[Double] and
         (__ \ "lng").readNullable[Double]
@@ -141,8 +143,8 @@ object BlipController extends Controller {
           title: String,
           summary: Option[String],
           link: Option[String],
-          startTime: Option[String],
-          endTime: Option[String],
+          startTime: Option[Date],
+          endTime: Option[Date],
           address: Option[String],
           lat: Option[Double],
           lng: Option[Double]) => Blip(Some[Long](id), Some[Long](gid),
